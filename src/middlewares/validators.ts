@@ -3,24 +3,33 @@ import { z } from 'zod';
 import { Types } from 'mongoose';
 import { BadRequestError } from '../types/errors';
 
+const urlRegex = /^https?:\/\/(www\.)?[\w-]+\.[\w-._~:/?#[\]@!$&'()*+,;=]+#?$/;
+
 export const userSchema = z.object({
-  name: z.string().min(2).max(30),
-  about: z.string().min(2).max(200),
-  avatar: z.string().url(),
+  name: z.string().min(2).max(30).optional(),
+  about: z.string().min(2).max(200).optional(),
+  avatar: z.string().regex(urlRegex).optional(),
+  email: z.string().email(),
+  password: z.string(),
+});
+
+export const loginSchema = z.object({
+  email: z.string().email(),
+  password: z.string(),
 });
 
 export const userPatchSchema = z.object({
-  name: z.string().min(2).max(30),
+  name: z.string().min(2).max(30).optional(),
   about: z.string().min(2).max(200),
 });
 
 export const userAvatarSchema = z.object({
-  avatar: z.string().url(),
+  avatar: z.string().regex(urlRegex),
 });
 
 export const cardSchema = z.object({
   name: z.string().min(2).max(30),
-  link: z.string().url(),
+  link: z.string().regex(urlRegex),
 });
 
 export const validateRequest =
@@ -29,10 +38,10 @@ export const validateRequest =
     const result = schema.safeParse(req.body);
     if (!result.success) {
       const err = new BadRequestError(errorMessage);
-      next(err);
+      return next(err);
     }
 
-    next();
+    return next();
   };
 
 export const validateParamObjectId =
@@ -40,7 +49,7 @@ export const validateParamObjectId =
   (req: Request, res: Response, next: NextFunction) => {
     const id = req.params[paramName];
     if (!Types.ObjectId.isValid(id)) {
-      next(new BadRequestError(errorMessage));
+      return next(new BadRequestError(errorMessage));
     }
-    next();
+    return next();
   };

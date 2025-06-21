@@ -1,17 +1,11 @@
-import { NextFunction, Request, Response } from 'express';
-import { MestoDefaultError } from '../types/errors';
+import { ErrorRequestHandler } from 'express';
 
-export const errorHandler = (
-  err: MestoDefaultError | Error,
-  req: Request,
-  res: Response,
-  // eslint-disable-next-line no-unused-vars
-  next: NextFunction,
-) => {
-  if (err instanceof MestoDefaultError) {
-    res.status(err.statusCode).send({ message: err.message });
-  } else {
-    const defaultErr = new MestoDefaultError();
-    res.status(defaultErr.statusCode).send({ message: defaultErr.message });
-  }
+export const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
+  const { statusCode = 500, message } = err;
+
+  res.status(statusCode).send({
+    message: statusCode === 500 ? 'На сервере произошла ошибка' : message,
+  });
+
+  next();
 };

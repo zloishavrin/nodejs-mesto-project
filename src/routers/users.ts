@@ -2,12 +2,11 @@ import { Router } from 'express';
 import {
   userAvatarSchema,
   userPatchSchema,
-  userSchema,
   validateParamObjectId,
   validateRequest,
 } from '../middlewares/validators';
 import {
-  createUser,
+  getMe,
   getUserById,
   getUsers,
   updateUser,
@@ -16,19 +15,12 @@ import {
 
 const router = Router();
 
+router.get('/me', getMe);
 router.get('/', getUsers);
 router.get(
   '/:userId',
   validateParamObjectId('userId', 'Передан некорректный _id пользователя.'),
   getUserById,
-);
-router.post(
-  '/',
-  validateRequest(
-    userSchema,
-    'Переданы некорректные данные при создании пользователя.',
-  ),
-  createUser,
 );
 
 router.patch(
